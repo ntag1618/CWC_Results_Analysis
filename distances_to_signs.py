@@ -1,3 +1,17 @@
+# -------------------------------------------------------------------------------------------- #
+# ------------------- CANOPY STRUCTURE CHANGE IN RESPONSE TO BEAVER FORAGING------------------ #
+# ---- A workflow to generate statistics and visualisations for SFM point cloud data --------- #
+# ---- from a beaver-impacted riparian area to understand changes in canopy structure -------- #
+# -------------------------------------------------------------------------------------------- #
+
+# Written by:
+
+# Version:
+
+# Notes:
+
+# -------------------------------------------------------------------------------------------- #
+
 import geopandas as gpd
 import pandas as pd
 import rasterio
