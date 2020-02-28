@@ -11,7 +11,6 @@
 # Notes:
 
 # -------------------------------------------------------------------------------------------- #
-
 import geopandas as gpd
 import pandas as pd
 import rasterio
@@ -24,8 +23,13 @@ from tqdm import tqdm
 import seaborn as sns
 import pathlib
 
+# suppress warnings for now...
+import warnings
+warnings.filterwarnings("ignore")
+
 home = os.path.abspath("C:/HG_Projects/CWC_Drone_work/Prec_Anal_Exports/Rasters_v3")
 shps_root = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files")
+shrub_zones = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones.gpkg')
 
 # LATE SUMMER SEP-SEP
 cr1_name = ("Sep17 - Sep18")
@@ -57,9 +61,6 @@ cr5_fs = os.path.join(shps_root, 'FS_1618.shp')
 cr5_tup = (cr5_name, cr5_path, cr5_fs)
 
 
-# all_feeding = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files/CWC_FS_clip1.shp")
-
-
 def main():
     print("running distances to points pipline")
 
@@ -71,7 +72,7 @@ def main():
 
         gdf_dist = dist_to_nearest_point(geodf, fs)
 
-        plotting(gdf_dist, name)
+        gdf = plotting(gdf_dist, name)
 
 
 def ras_to_points(ras_path):
@@ -197,8 +198,8 @@ def plotting(gdf, name):
     plt.ylim(-3, 3)
     plt.show()
 
-    dist_change_plot = os.path.join(plot_folder, "{}_dist_change.jpg".format(name))
-    fig.savefig(fname=dist_change_plot, dpi=300, format='jpg')
+    dist_change_plot = os.path.join(plot_folder, "{}_dist_change.png".format(name))
+    fig.savefig(fname=dist_change_plot, dpi=300, format='png')
 
     # --------------------------stem plot - summed canopy volume for binned distance-------------------- #
     group_df = gdf.copy()
@@ -251,15 +252,10 @@ def plotting(gdf, name):
 
     plt.show()
 
-    binned_dist_change = os.path.join(plot_folder, "{}_binned_dist_change.jpg".format(name))
-    fig.savefig(fname=binned_dist_change, dpi=300, format='jpg')
+    binned_dist_change = os.path.join(plot_folder, "{}_binned_dist_change.png".format(name))
+    fig.savefig(fname=binned_dist_change, dpi=300, format='png')
 
-    # -------------------------------------------------------------------- #
-
-    print("Done {0}".format(name))
-
-    # -------------------------------------------------------------------- #
-
+    return gdf
 
 if __name__ == '__main__':
     main()
