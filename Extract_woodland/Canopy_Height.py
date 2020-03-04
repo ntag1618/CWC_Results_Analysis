@@ -25,7 +25,7 @@ dsm_path = os.path.join(home, "dsm3.tif")
 
 def main():
 
-    asc_files = glob(os.path.join(raw_dtm_folder,'*.asc'))
+    asc_files = glob(os.path.join(raw_dtm_folder, '*.asc'))
 
     src_files_to_mosaic = []
     for asc in asc_files:

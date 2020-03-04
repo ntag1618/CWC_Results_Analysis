@@ -7,7 +7,7 @@ from shapely.geometry import Polygon
 import numpy as np
 import os
 from matplotlib import pyplot as plt
-zones_out = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones.gpkg')
+zones_out = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones50m.gpkg')
 
 trees_vec = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Rip_Vec_Sep17.gpkg')
 
@@ -16,8 +16,8 @@ def main():
 
     xmin,ymin,xmax,ymax = trees_gdf.total_bounds
 
-    length = 40
-    wide = 40
+    length = 50
+    wide = 50
 
     cols = list(range(int(np.floor(xmin)), int(np.ceil(xmax)), wide))
     rows = list(range(int(np.floor(ymin)), int(np.ceil(ymax)), length))
