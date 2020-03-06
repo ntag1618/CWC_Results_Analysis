@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore")
 
 home = os.path.abspath("C:/HG_Projects/CWC_Drone_work/Prec_Anal_Exports/Rasters_v4")
 shps_root = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files")
-shrub_zones = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones20m.gpkg')
+shrub_zones = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones10m.gpkg')
 
 # LATE SUMMER SEP-SEP
 crs12_name = ("Sep17 - Sep18")
@@ -64,8 +64,6 @@ crw34_fs = os.path.join(shps_root, 'FS_1718.shp')
 crw34_tup = (crw34_name, crw34_path, crw34_fs)
 
 
-
-
 # all_feeding = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files/CWC_FS_clip1.shp")
 CWC_CanChange_df = os.path.abspath("C:/HG_Projects/CWC_Drone_work/CWC_Results_Analysis/data/CWC_can_change_df.csv")
 
@@ -99,121 +97,70 @@ def compare_zones(zones, diff_ras, feed_signs, name):
     z_gdf = gpd.read_file(zones)
     z_gdf['id'] = z_gdf.index
     z_gdf['area'] = z_gdf.area
-    z_gdf['mean'] = np.nan
-    z_gdf['min'] = np.nan
-    z_gdf['max'] = np.nan
-    z_gdf['stdev'] = np.nan
-    z_gdf['sumall'] = np.nan
-    z_gdf['sumpos'] = np.nan
-    z_gdf['sumneg'] = np.nan
-    z_gdf['n_signs'] = np.nan
-    z_gdf['signs_YN'] = np.nan
-    z_gdf['signs_YNf'] = np.nan
 
     fs_gdf = gpd.read_file(feed_signs)
     fs_gdf_buff = fs_gdf.copy()
     fs_gdf_buff.geometry = fs_gdf.geometry.buffer(10)
 
-    for idx, row in z_gdf.iterrows():
-        tempgdf = gpd.GeoDataFrame(
-            gpd.GeoSeries(z_gdf.loc[idx, 'geometry']),
-            columns=['geometry'])
-        tempgdf.crs = z_gdf.crs
+    beav_zone = get_union(z_gdf, fs_gdf_buff)
+    beav_zone['signs_YN'] = 1
+    beav_zone = beav_zone.dissolve(by='signs_YN')
+    beav_zone = beav_zone.reset_index()
 
-        geom = getFeatures(tempgdf)  # returns buffered geometries for AOIs
+    no_beav_zone = gpd.overlay(z_gdf, beav_zone, how='symmetric_difference')
+    no_beav_zone['signs_YN'] = 0
+    no_beav_zone = no_beav_zone.dissolve(by='signs_YN')
+    no_beav_zone = no_beav_zone.reset_index()
 
-        with rasterio.open(diff_ras) as src:
-            out_image, out_transform = rasterio.mask.mask(src, geom, crop=True)
-            res = src.res[0] * src.res[1]
-            out_meta = src.meta
+    zones_comb = pd.concat([beav_zone, no_beav_zone])
 
-        out_image_1d = out_image.flatten()
-        out_image_1d = out_image_1d[out_image_1d != -999]
-        if len(out_image_1d) < 1:
-            z_gdf.loc[idx, 'mean'] = np.nan
-            z_gdf.loc[idx, 'min'] = np.nan
-            z_gdf.loc[idx, 'max'] = np.nan
-            z_gdf.loc[idx, 'stdev'] = np.nan
-            z_gdf.loc[idx, 'sumall'] = np.nan
-            z_gdf.loc[idx, 'sumpos'] = np.nan
-            z_gdf.loc[idx, 'sumneg'] = np.nan
-            z_gdf.loc[idx, 'percpos'] = np.nan
-            z_gdf.loc[idx, 'percneg'] = np.nan
-        else:
-            z_gdf.loc[idx, 'mean'] = np.nanmean(out_image_1d)
-            z_gdf.loc[idx, 'min'] = np.nanmin(out_image_1d)
-            z_gdf.loc[idx, 'max'] = np.nanmax(out_image_1d)
-            z_gdf.loc[idx, 'stdev'] = np.nanstd(out_image_1d)
-            z_gdf.loc[idx, 'sumall'] = np.nansum(out_image_1d)
-            z_gdf.loc[idx, 'sumpos'] = np.nansum(out_image_1d[out_image_1d > 0])
-            z_gdf.loc[idx, 'sumneg'] = np.nansum(out_image_1d[out_image_1d < 0])
-            z_gdf.loc[idx, 'percpos'] = np.nansum(out_image_1d[out_image_1d > 0]) / len(
-                out_image_1d[out_image_1d > 0]) * res
-            z_gdf.loc[idx, 'percneg'] = np.nansum(out_image_1d[out_image_1d < 0]) / len(
-                out_image_1d[out_image_1d < 0]) * res
-        z_gdf['Area'] = z_gdf.area
-        union_fs = gpd.overlay(tempgdf, fs_gdf_buff, how='intersection')
-        z_gdf.loc[idx, 'n_signs'] = len(union_fs)
-        if len(union_fs) == 0:
-            z_gdf.loc[idx, 'signs_YN'] = 0
-            z_gdf.loc[idx, 'signs_YNf'] = 'No Foraging'
-        else:
-            z_gdf.loc[idx, 'signs_YN'] = 1
-            z_gdf.loc[idx, 'signs_YNf'] = 'Foraging Observed'
-
-    z_gdf['signs_YNf'] = z_gdf['signs_YNf'].astype('category')
-    z_gdf['signs_YNf'] = z_gdf['signs_YNf'].cat.reorder_categories(['No Foraging', 'Foraging Observed'])
-
-    sns.set(style="whitegrid")
-
-    ax = z_gdf.plot(column='signs_YNf', colormap='Dark2', edgecolor='None')
+    ax = zones_comb.plot(column='signs_YN', colormap='Dark2', edgecolor='None')
     fs_gdf.plot(color='red', ax=ax, markersize=8, alpha=0.3)
     plt.title(name + ' beaver and non beaver zones')
     plt.show()
 
-    ax = sns.boxplot(x="signs_YNf", y="percneg", data=z_gdf, showfliers=False, )
-    ax = sns.swarmplot(x="signs_YNf", y="percneg", data=z_gdf, color=".25")
+
+    beav_zone_df = mask_ras_get_df(beav_zone, diff_ras)
+    beav_zone_df['signs_YN'] = 1
+    beav_zone_df['signs_YNf'] = 'Foraging Observed'
+
+    no_beav_zone_df = mask_ras_get_df(no_beav_zone, diff_ras)
+    no_beav_zone_df['signs_YN'] = 0
+    no_beav_zone_df['signs_YNf'] = 'No Foraging'
+
+    cwc_df = pd.concat([beav_zone_df, no_beav_zone_df])
+
+
+    cwc_df['signs_YNf'] = cwc_df['signs_YNf'].astype('category')
+    cwc_df['signs_YNf'] = cwc_df['signs_YNf'].cat.reorder_categories(['No Foraging', 'Foraging Observed'])
+
+    sns.set(style="whitegrid")
+
+    ax = sns.boxplot(x="signs_YNf", y="canopy_change", data=cwc_df, showfliers=False)
+    # ax = sns.swarmplot(x="signs_YNf", y="canopy_change", data=cwc_df, color=".25")
+    plt.title(name + ': canopy change')
+    plt.ylabel('Canopy volume change/m$^2$')
+    plt.xlabel('')
+    plt.show()
+
+    ax = sns.boxplot(x="signs_YNf", y="canopy_change", data=cwc_df[cwc_df['canopy_change'] < 0], showfliers=False)
+    # ax = sns.swarmplot(x="signs_YNf", y="canopy_change", data=cwc_df, color=".25")
     plt.title(name + ': canopy change in areas of loss')
-    plt.ylabel('Canopy height loss/m$^2$')
+    plt.ylabel('Canopy volume loss/m$^2$')
     plt.xlabel('')
     plt.show()
 
-    ax = sns.boxplot(x="signs_YNf", y="percpos", data=z_gdf, showfliers=False, )
-    ax = sns.swarmplot(x="signs_YNf", y="percpos", data=z_gdf, color=".25")
+    ax = sns.boxplot(x="signs_YNf", y="canopy_change", data=cwc_df[cwc_df['canopy_change'] > 0], showfliers=False)
+    # ax = sns.swarmplot(x="signs_YNf", y="canopy_change", data=cwc_df, color=".25")
     plt.title(name + ': canopy change in areas of growth')
-    plt.ylabel('Canopy height gain/m$^2$')
+    plt.ylabel('Canopy volume gain/m$^2$')
     plt.xlabel('')
     plt.show()
 
-    ax = sns.boxplot(x="signs_YNf", y="mean", data=z_gdf, showfliers=False, )
-    ax = sns.swarmplot(x="signs_YNf", y="mean", data=z_gdf, color=".25")
-    plt.title(name + ': overall canopy change per m$^2$')
-    plt.ylabel('Canopy height cahnge/m$^2$')
-    plt.xlabel('')
-    plt.show()
-
-    ax = sns.boxplot(x="signs_YNf", y="Area", data=z_gdf, showfliers=False, )
-    ax = sns.swarmplot(x="signs_YNf", y="Area", data=z_gdf, color=".25")
-    plt.title(name + ': Area m$^2$')
-    plt.ylabel('Area/m$^2$')
-    plt.xlabel('')
-    plt.show()
-
-    # kw = dict(column='percneg', k=100, edgecolor='black', colormap='coolwarm_r')
-    # ax = z_gdf.plot(scheme='quantiles', **kw)
-    # fs_gdf.plot(color='black', ax=ax, markersize=8, alpha=0.5)
-    # plt.title(name + ' feeding locations with canopy loss/m$^2$')
-    # plt.show()
-    #
-    # kw = dict(column='percpos', k=100, edgecolor='black', colormap='coolwarm')
-    # ax = z_gdf.plot(scheme='quantiles', **kw)
-    # fs_gdf.plot(color='black', ax=ax, markersize=8, alpha=0.5)
-    # plt.title(name + ' feeding locations with canopy gain/m$^2$')
-    # plt.show()
 
     np.random.seed(12345678)
-    no_beav_group_n = z_gdf['percneg'][z_gdf['signs_YN'] == 0].dropna()
-    yes_beav_group_n = z_gdf['percneg'][z_gdf['signs_YN'] == 1].dropna()
+    no_beav_group_n = no_beav_zone_df.canopy_change[no_beav_zone_df['canopy_change'] < 0].dropna()
+    yes_beav_group_n = beav_zone_df.canopy_change[beav_zone_df['canopy_change'] < 0].dropna()
 
     t, p = stats.ttest_ind(no_beav_group_n, yes_beav_group_n, equal_var=False)
 
@@ -232,8 +179,8 @@ def compare_zones(zones, diff_ras, feed_signs, name):
     print('                d value: {:.6f}'.format(cohens_d))
     print("--------------------------------------------------------------")
 
-    no_beav_group_p = z_gdf['percpos'][z_gdf['signs_YN'] == 0].dropna()
-    yes_beav_group_p = z_gdf['percpos'][z_gdf['signs_YN'] == 1].dropna()
+    no_beav_group_p = no_beav_zone_df.canopy_change[no_beav_zone_df['canopy_change'] > 0].dropna()
+    yes_beav_group_p = beav_zone_df.canopy_change[beav_zone_df['canopy_change'] > 0].dropna()
 
     t, p = stats.ttest_ind(no_beav_group_p, yes_beav_group_p, equal_var=False)
 
@@ -251,11 +198,10 @@ def compare_zones(zones, diff_ras, feed_signs, name):
     print('                d value: {:.6f}'.format(pcohens_d))
     print("--------------------------------------------------------------")
 
-    no_beav_group_o = z_gdf['mean'][z_gdf['signs_YN'] == 0].dropna()
-    yes_beav_group_o = z_gdf['mean'][z_gdf['signs_YN'] == 1].dropna()
+    no_beav_group_o = no_beav_zone_df.canopy_change.dropna()
+    yes_beav_group_o = beav_zone_df.canopy_change.dropna()
 
     t, p = stats.ttest_ind(no_beav_group_o, yes_beav_group_o, equal_var=False)
-
     omean1 = np.mean(no_beav_group_o)
     ostd1 = np.std(no_beav_group_o)
     ocount1 = len(no_beav_group_o)
@@ -273,7 +219,7 @@ def compare_zones(zones, diff_ras, feed_signs, name):
     # -------------------------------------------------------------------- #
     z_df = z_gdf.drop(columns=['geometry'])
 
-    return z_df
+    return cwc_df
 
 def getFeatures(gdf):
     """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
@@ -285,6 +231,47 @@ def effect_size_cohensD(mean1, std1, count1, mean2, std2, count2): #  https://gi
         ((count1 - 1) * std1 ** 2 + (count2 - 1) * std2 ** 2) / (count1 + count2 - 2))
     return cohens_d
 
+def get_union(to_select, union_shp):
+    """Alternative union function"""
+    union = gpd.GeoDataFrame(
+        gpd.GeoSeries([union_shp.unary_union]),
+        columns=['geometry'],
+        crs=union_shp.crs)
+
+    clip_gdf = gpd.sjoin(to_select, union, op='intersects')
+    clip_gdf = clip_gdf.drop(columns=['index_right'])
+
+    return clip_gdf
+
+def mask_ras_get_df(gdf, ras):
+
+        geom = getFeatures(gdf)  # returns geometries for AOIs
+
+        with rasterio.open(ras) as src:
+            out_image, out_transform = rasterio.mask.mask(src, geom, crop=True)
+            res = src.res[0] * src.res[1]
+
+        out_image_1d = out_image.flatten()
+        out_image_1d = out_image_1d[out_image_1d != -999]
+
+        # print('mean: {0}'.format(np.nanmean(out_image_1d)))
+        # print('min: {0}'.format(np.nanmin(out_image_1d)))
+        # print('max: {0}'.format(np.nanmax(out_image_1d)))
+        # print('stdev: {0}'.format(np.nanstd(out_image_1d)))
+        # print('sum: {0}'.format(np.nansum(out_image_1d)))
+        # print('sum of canopy vol gain: {0}'.format(np.nansum(out_image_1d[out_image_1d > 0])* res))
+        # print('sum of canopy volloss: {0}'.format(np.nansum(out_image_1d[out_image_1d < 0])* res))
+        #
+        # print('canopy vol gain/m^2: {0}'.format(np.nansum(out_image_1d[out_image_1d > 0]) / len(
+        #     out_image_1d[out_image_1d > 0]) * res))
+        #
+        # print('canopy vol loss/m^2: {0}'.format(np.nansum(out_image_1d[out_image_1d < 0]) / len(
+        #     out_image_1d[out_image_1d < 0]) * res))
+        #
+        # print('zone area (m^2): {0}'.format(gdf.area))
+
+        out_df = pd.DataFrame(out_image_1d, columns=['canopy_change'])
+        return out_df
 
 if __name__ == '__main__':
     main()
