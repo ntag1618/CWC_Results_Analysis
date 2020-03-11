@@ -26,10 +26,10 @@
 # # # #If this line ultimately returns TRUE, then your C++ toolchain is properly installed and you can jump to the next section.
 # pkgbuild::has_build_tools(debug = TRUE)
 
-list.of.packages <- c("pkgbuild", "parallel", "dplyr", "rstanarm", "reshape2", "sjPlot", "extrafont", 
-                      "bayestestR", "cowplot", "ggrepel", 'htmlTable', "tidyverse", "brms", "tidybayes")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
+# list.of.packages <- c("pkgbuild", "parallel", "dplyr", "rstanarm", "reshape2", "sjPlot", "extrafont", 
+#                       "bayestestR", "cowplot", "ggrepel", 'htmlTable', "tidyverse", "brms", "tidybayes")
+# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+# if(length(new.packages)) install.packages(new.packages)
 
 
 library(tidybayes)
@@ -68,7 +68,7 @@ theme_set(theme_bw() +
             theme(legend.title=element_blank(),
                   legend.position = 'bottom',
                   legend.key.size = unit(0.75, "cm"),
-                  text = element_text(size=25)))
+                  text = element_text(size=12)))
 
 cbbPalette <- c("grey50", "grey10")
 darkPalette <- c( "#458DB6", "#C48802")
@@ -119,7 +119,7 @@ Gains_plot <- ggplot(data = OutGains, aes(y= time_step ,x=value, fill=CategoryB,
   scale_fill_manual("Zone", values=darkPalette, labels=c('Foraging Absent', 'Foraging Present')) +
   scale_color_manual("Zone",values=cbbPalette, labels=c('Foraging Absent', 'Foraging Present') )+
   # coord_cartesian(xlim = c(0, 0.7)) +
-  labs(x = 'probability of canopy gain')+
+  labs(x = 'Probability of canopy gain')+
   theme(axis.title.y=element_blank())
 Gains_plot
 ggsave('R_plots/gain_prob_All_TS.jpg', plot = Gains_plot, dpi=300, width = 174, height = 150, units="mm")
@@ -153,7 +153,7 @@ Loss_plot <- ggplot(data = OutLoss, aes(y= time_step ,x=value, fill=CategoryB, c
   scale_fill_manual("Zone", values=darkPalette, labels=c('Foraging Absent', 'Foraging Present')) +
   scale_color_manual("Zone",values=cbbPalette, labels=c('Foraging Absent', 'Foraging Present') )+
   # coord_cartesian(xlim = c(0, 0.7)) +
-  labs(x = 'probability of canopy loss')+
+  labs(x = 'Probability of canopy loss')+
   theme(axis.title.y=element_blank())
 Loss_plot
 ggsave('R_plots/loss_prob_All_TS.jpg', plot = Loss_plot, dpi=300, width = 174, height = 150, units="mm")

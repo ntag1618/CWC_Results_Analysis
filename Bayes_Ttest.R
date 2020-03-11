@@ -18,7 +18,7 @@ theme_set(theme_bw() +
             theme(legend.title=element_blank(),
                   legend.position = 'bottom',
                   legend.key.size = unit(0.75, "cm"),
-                  text = element_text(size=25)))
+                  text = element_text(size=12)))
 
 cbbPalette <- c("grey50", "grey10")
 darkPalette <- c( "#56B4E9", "#E69F00")

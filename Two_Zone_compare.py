@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore")
 
 home = os.path.abspath("C:/HG_Projects/CWC_Drone_work/Prec_Anal_Exports/Rasters_v4")
 shps_root = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files")
-shrub_zones = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones25m.gpkg')
+shrub_zones = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones20m.gpkg')
 
 # LATE SUMMER SEP-SEP
 crs12_name = ("Sep17 - Sep18")

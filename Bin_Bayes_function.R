@@ -71,7 +71,7 @@ model {
 
 ######## Run the Stan Model ################
 
-Zone_samples <- stan(model_code = model_string, data = All_zone_list, iter = 4000)
+Zone_samples <- stan(model_code = model_string, data = All_zone_list, iter = 10000)
 
 return(Zone_samples)
 }

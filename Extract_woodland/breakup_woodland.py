@@ -9,7 +9,7 @@ import os
 from matplotlib import pyplot as plt
 import pandas as pd
 
-zones_out = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones10m.gpkg')
+zones_out = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones20m.gpkg')
 
 trees_vec = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Rip_Vec_Sep17.gpkg')
 
@@ -18,8 +18,8 @@ def main():
 
     xmin,ymin,xmax,ymax = trees_gdf.total_bounds
 
-    length = 10
-    wide = 10
+    length = 20
+    wide = 20
 
     cols = list(range(int(np.floor(xmin)), int(np.ceil(xmax)), wide))
     rows = list(range(int(np.floor(ymin)), int(np.ceil(ymax)), length))
