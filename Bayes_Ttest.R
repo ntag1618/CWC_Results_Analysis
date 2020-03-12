@@ -76,7 +76,7 @@ All_The_Bayes <- foreach(ts_all = ts.list, .combine=list, .multicombine=TRUE,
                            #FOR TESTING!!!!!
                            ts_gain = ts_all [ts_all $canopy_change > 0 ,] [sample(nrow( ts_all [ts_all $canopy_change > 0 ,]), 1000, replace = FALSE, prob = NULL),]     #  Subset gains
                            ts_loss = ts_all [ts_all $canopy_change < 0 ,] [sample(nrow(ts_all [ts_all $canopy_change < 0 ,]), 1000, replace = FALSE, prob = NULL),]   #  Subset losses
-                           ts_all = ts_all [sample(nrow(ts_all), 1000, replace = FALSE, prob = NULL),] 
+                           ts_all = ts_all [sample(nrow(ts_all), 1000, replace = FALSE, prob = NULL),]
                            
                            # ---gains section -------------------------------------------------------------------------
                            
@@ -181,7 +181,7 @@ Gains_plot <- ggplot(data = reshapedGains, aes(y= time_step ,x=value, fill=Categ
   stat_halfeyeh(alpha=0.6, size=1.5) +
   scale_fill_manual("Zone", values=darkPalette, labels=c('Foraging Absent', 'Foraging Present')) +
   scale_color_manual("Zone",values=cbbPalette, labels=c('Foraging Absent', 'Foraging Present') )+
-  # coord_cartesian(xlim = c(0, 0.7)) +
+  coord_cartesian(xlim = c(0, 0.175)) +
   labs(x = bquote('Canopy Volume ('~m^3~ ') Gain / '~m^2))+
   theme(axis.title.y=element_blank())
 Gains_plot
@@ -203,7 +203,7 @@ Loss_plot <- ggplot(data = reshapedLoss, aes(y= time_step ,x=value, fill=Categor
   stat_halfeyeh(alpha=0.6, size=1.5) +
   scale_fill_manual("Zone", values=darkPalette, labels=c('Foraging Absent', 'Foraging Present')) +
   scale_color_manual("Zone",values=cbbPalette, labels=c('Foraging Absent', 'Foraging Present') )+
-  coord_cartesian(xlim = c(0, 0.7)) +
+  # coord_cartesian(xlim = c(0, 0.7)) +
   labs(x = bquote('Canopy Volume ('~m^3~ ') Loss / '~m^2))+
   theme(axis.title.y=element_blank())
 Loss_plot

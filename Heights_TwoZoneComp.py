@@ -20,59 +20,53 @@ home = os.path.abspath("C:/HG_Projects/CWC_Drone_work/Prec_Anal_Exports/Rasters_
 shps_root = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files")
 shrub_zones = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones20m.gpkg')
 
-# LATE SUMMER SEP-SEP
-crs12_name = ("Sep17 - Sep18")
-crs12_path = os.path.join(home, "DoD_Sep17_Sep18.tif")
-crs12_fs = os.path.join(shps_root, 'FS_1618.shp')
-crs12_tup = (crs12_name, crs12_path, crs12_fs)
-
 
 # WINTER 1-2
-crw12_name = "Dec16 - Feb17"
-crw12_path = os.path.join(home, "DOD_Dec16_Feb17.tif")
-crw12_fs = os.path.join(shps_root, 'FS_1617.shp')
-crw12_tup = (crw12_name, crw12_path, crw12_fs)
+ts1_name = "Dec16"
+ts1_path = os.path.join(home, "chm1.tif")
+ts1_fs = os.path.join(shps_root, 'FS_1617.shp')
+ts1_tup = (ts1_name, ts1_path, ts1_fs)
 
 # WINTER 1-3
-crw13_name = "Dec16 - Jan18"
-crw13_path = os.path.join(home, "DOD_Dec16_Jan18.tif")
-crw13_fs = os.path.join(shps_root, 'FS_1618.shp')
-crw13_tup = (crw13_name, crw13_path, crw13_fs)
+ts2_name = "Feb17"
+ts2_path = os.path.join(home, "chm2.tif")
+ts2_fs = os.path.join(shps_root, 'FS_1617.shp')
+ts2_tup = (ts2_name, ts2_path, ts2_fs)
 
 # WINTER 1-4
-crw14_name = "Dec16 - Mar18"
-crw14_path = os.path.join(home, "DoD_Dec16_Mar18.tif")
-crw14_fs = os.path.join(shps_root, 'FS_1618.shp')
-crw14_tup = (crw14_name, crw14_path, crw14_fs)
+ts3_name = "Sep17"
+ts3_path = os.path.join(home, "chm3.tif")
+ts3_fs = os.path.join(shps_root, 'FS_1617.shp')
+ts3_tup = (ts3_name, ts3_path, ts3_fs)
 
 # WINTER 2-3
-crw23_name = "Feb17 - Jan18"
-crw23_path = os.path.join(home, "DOD_Feb17_Jan18.tif")
-crw23_fs = os.path.join(shps_root, 'FS_1718.shp')
-crw23_tup = (crw23_name, crw23_path, crw23_fs)
+ts4_name = "Jan18"
+ts4_path = os.path.join(home, "chm4.tif")
+ts4_fs = os.path.join(shps_root, 'FS_1718.shp')
+ts4_tup = (ts4_name, ts4_path, ts4_fs)
 
 # WINTER 2-4
-crw24_name = "Feb17 - Mar18"
-crw24_path = os.path.join(home, "DOD_Feb17_March18.tif")
-crw24_fs = os.path.join(shps_root, 'FS_1718.shp')
-crw24_tup = (crw24_name, crw24_path, crw24_fs)
+ts5_name = "Mar18"
+ts5_path = os.path.join(home, "chm5.tif")
+ts5_fs = os.path.join(shps_root, 'FS_1718.shp')
+ts5_tup = (ts5_name, ts5_path, ts5_fs)
 
 # WINTER 3-4
-crw34_name = "Jan18 - Mar18"
-crw34_path = os.path.join(home, "DOD_Jan18_March18.tif")
-crw34_fs = os.path.join(shps_root, 'FS_1718.shp')
-crw34_tup = (crw34_name, crw34_path, crw34_fs)
+ts6_name = "Sep18"
+ts6_path = os.path.join(home, "chm6.tif")
+ts6_fs = os.path.join(shps_root, 'FS_1718.shp')
+ts6_tup = (ts6_name, ts6_path, ts6_fs)
 
 
 # all_feeding = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files/CWC_FS_clip1.shp")
-CWC_CanChange_df = os.path.abspath("C:/HG_Projects/CWC_Drone_work/CWC_Results_Analysis/data/CWC_can_change_df.csv")
+CWC_CanChange_df = os.path.abspath("C:/HG_Projects/CWC_Drone_work/CWC_Results_Analysis/data/CWC_can_heights_df.csv")
 
 def main():
     print("running Zone-Compare pipline")
 
     df_list = []
     name_list = []
-    for ts in [crs12_tup, crw12_tup, crw13_tup, crw14_tup, crw23_tup, crw24_tup, crw34_tup]:
+    for ts in [ts1_tup, ts2_tup, ts3_tup, ts4_tup, ts5_tup, ts6_tup]:
         change_ras = ts[1]
         name = ts[0]
         fs = ts[2]
@@ -136,70 +130,16 @@ def compare_zones(zones, diff_ras, feed_signs, name):
 
     sns.set(style="whitegrid")
 
-    ax = sns.boxplot(x="signs_YNf", y="canopy_change", data=cwc_df, showfliers=False)
-    # ax = sns.swarmplot(x="signs_YNf", y="canopy_change", data=cwc_df, color=".25")
-    plt.title(name + ': canopy change')
-    plt.ylabel('Canopy volume change/m$^2$')
+    ax = sns.boxplot(x="signs_YNf", y="canopy_height", data=cwc_df, showfliers=True)
+    # ax = sns.swarmplot(x="signs_YNf", y="canopy_height", data=cwc_df, color=".25")
+    plt.title(name + ': canopy height')
+    plt.ylabel('Canopy height (m)')
     plt.xlabel('')
     plt.show()
-
-    ax = sns.boxplot(x="signs_YNf", y="canopy_change", data=cwc_df[cwc_df['canopy_change'] < 0], showfliers=False)
-    # ax = sns.swarmplot(x="signs_YNf", y="canopy_change", data=cwc_df, color=".25")
-    plt.title(name + ': canopy change in areas of loss')
-    plt.ylabel('Canopy volume loss/m$^2$')
-    plt.xlabel('')
-    plt.show()
-
-    ax = sns.boxplot(x="signs_YNf", y="canopy_change", data=cwc_df[cwc_df['canopy_change'] > 0], showfliers=False)
-    # ax = sns.swarmplot(x="signs_YNf", y="canopy_change", data=cwc_df, color=".25")
-    plt.title(name + ': canopy change in areas of growth')
-    plt.ylabel('Canopy volume gain/m$^2$')
-    plt.xlabel('')
-    plt.show()
-
 
     np.random.seed(12345678)
-    no_beav_group_n = no_beav_zone_df.canopy_change[no_beav_zone_df['canopy_change'] < 0].dropna()
-    yes_beav_group_n = beav_zone_df.canopy_change[beav_zone_df['canopy_change'] < 0].dropna()
-
-    t, p = stats.ttest_ind(no_beav_group_n, yes_beav_group_n, equal_var=False)
-
-    mean1 = np.mean(no_beav_group_n)
-    std1 = np.std(no_beav_group_n)
-    count1 = len(no_beav_group_n)
-    mean2 = np.mean(yes_beav_group_n)
-    std2 = np.std(yes_beav_group_n)
-    count2 = len(yes_beav_group_n)
-
-    cohens_d = effect_size_cohensD(mean1, std1, count1, mean2, std2, count2)
-
-    print("-------- {0}: T test result ------------".format(name + '_p_neg'))
-    print('                t value: {:.6f}'.format(t))
-    print('                p value: {:.6f}'.format(p))
-    print('                d value: {:.6f}'.format(cohens_d))
-    print("--------------------------------------------------------------")
-
-    no_beav_group_p = no_beav_zone_df.canopy_change[no_beav_zone_df['canopy_change'] > 0].dropna()
-    yes_beav_group_p = beav_zone_df.canopy_change[beav_zone_df['canopy_change'] > 0].dropna()
-
-    t, p = stats.ttest_ind(no_beav_group_p, yes_beav_group_p, equal_var=False)
-
-    pmean1 = np.mean(no_beav_group_p)
-    pstd1 = np.std(no_beav_group_p)
-    pcount1 = len(no_beav_group_p)
-    pmean2 = np.mean(yes_beav_group_p)
-    pstd2 = np.std(yes_beav_group_p)
-    pcount2 = len(yes_beav_group_p)
-
-    pcohens_d = effect_size_cohensD(pmean1, pstd1, pcount1, pmean2, pstd2, pcount2)
-    print("-------- {0}: T test result ------------".format(name + '_p_pos'))
-    print('                t value: {:.6f}'.format(t))
-    print('                p value: {:.6f}'.format(p))
-    print('                d value: {:.6f}'.format(pcohens_d))
-    print("--------------------------------------------------------------")
-
-    no_beav_group_o = no_beav_zone_df.canopy_change.dropna()
-    yes_beav_group_o = beav_zone_df.canopy_change.dropna()
+    no_beav_group_o = no_beav_zone_df.canopy_height.dropna()
+    yes_beav_group_o = beav_zone_df.canopy_height.dropna()
 
     t, p = stats.ttest_ind(no_beav_group_o, yes_beav_group_o, equal_var=False)
     omean1 = np.mean(no_beav_group_o)
@@ -210,7 +150,7 @@ def compare_zones(zones, diff_ras, feed_signs, name):
     ocount2 = len(yes_beav_group_o)
 
     ocohens_d = effect_size_cohensD(omean1, ostd1, ocount1, omean2, ostd2, ocount2)
-    print("-------- {0}: T test result ------------".format(name + 'Overall cahnge'))
+    print("-------- {0}: T test result ------------".format(name + 'Overall change'))
     print('                t value: {:.6f}'.format(t))
     print('                p value: {:.6f}'.format(p))
     print('                d value: {:.6f}'.format(ocohens_d))
@@ -249,10 +189,11 @@ def mask_ras_get_df(gdf, ras):
 
         with rasterio.open(ras) as src:
             out_image, out_transform = rasterio.mask.mask(src, geom, crop=True)
+
             res = src.res[0] * src.res[1]
 
         out_image_1d = out_image[0].flatten()
-        out_image_1d = out_image_1d[out_image_1d != -999] * res
+        out_image_1d = out_image_1d[out_image_1d != -999]
 
         # print('mean: {0}'.format(np.nanmean(out_image_1d)))
         # print('min: {0}'.format(np.nanmin(out_image_1d)))
@@ -270,7 +211,7 @@ def mask_ras_get_df(gdf, ras):
         #
         # print('zone area (m^2): {0}'.format(gdf.area))
 
-        out_df = pd.DataFrame(out_image_1d, columns=['canopy_change'])
+        out_df = pd.DataFrame(out_image_1d, columns=['canopy_height'])
         return out_df
 
 if __name__ == '__main__':
