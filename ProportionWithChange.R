@@ -50,4 +50,4 @@ ggplot(Prop_change, aes(x=loss_gain, y = Perc_Area, fill = signs_YNf)) +
   labs(y='Area with Elevation Change (%)', x= 'Direction of Elevation Change') +
   scale_fill_manual("Zone", values=c('#377eb8', '#ff7f00')) 
 
-ggsave('NewPlots/Amount of change.jpg', dpi=600, width=6, height = 6)
+ggsave('NewPlots/Amount_of_change.jpg', dpi=600, width=6, height = 6)
