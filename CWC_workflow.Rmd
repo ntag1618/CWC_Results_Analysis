@@ -1,0 +1,348 @@
+---
+title: "CWC_Analysis_workflow"
+author: "Hugh Graham"
+date: "31/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align = "centre")
+# ---------------------- import packages -------------
+library(tidyverse)
+library(broom)
+library(emmeans)
+library(ggfortify)
+library(performance)
+library(gt)
+library(grid)
+library(gridExtra)
+library(png)
+
+# ------------- source functions --------------
+
+# sys.source("ProportionWithChange.R", envir = knitr::knit_global())
+
+
+
+#  ---------- set plotting themes -----------
+
+theme_set(theme_bw() + 
+            theme(legend.title=element_blank(),
+                  legend.position = 'bottom',
+                  legend.key.size = unit(0.75, "cm"),
+                  text = element_text(size=12),
+                  strip.background =element_rect(fill="grey99")))
+
+
+
+```
+
+## Quantifying impacts of beaver foraging on riparaian woodland:
+### Site: Clyst Wiliam Cross (CWC), Devon
+
+This workflow describes the approach taken to quantify the imapct of beaver foraging on the riparian woodland at CWC. 
+
+```{r load and clean data, echo=FALSE}
+
+change_df <- read_csv('./data/CWC_can_change_df.csv') %>%
+  filter(time_step != "Dec16 - Mar18") %>%
+  filter(time_step != "Dec16 - Mar18") %>%
+  filter(time_step !="Feb17 - Mar18") %>%
+  filter(time_step !="Jan18 - Mar18") %>%
+  filter(time_step !="Dec16 - Feb17") %>%
+  filter(time_step !="Feb17 - Jan18")
+
+
+# Create Summary Table for areas of change in foraged and non-foraged zones
+Prop_change <- change_df %>%
+  mutate(loss_gain = ifelse(canopy_change <0, "LOSS", ifelse(canopy_change > 0, "GAIN", "NO_CHANGE"))) %>%
+  group_by(time_step, signs_YNf, loss_gain) %>%
+  summarise(Area_m2 = n()*0.25) %>%
+  ungroup()%>%
+  group_by(time_step, signs_YNf) %>%
+  mutate(Zone_area_m2 = sum(Area_m2)) %>%
+  ungroup() %>%
+  mutate(Perc_Area = Area_m2/Zone_area_m2*100) %>%
+  mutate(loss_gain = fct_relevel(loss_gain, 'LOSS', 'GAIN'))%>%
+  mutate(signs_YNf = fct_relevel(signs_YNf, 'No Foraging')) %>%
+  filter(loss_gain != "NO_CHANGE")
+
+
+
+# Create combined df with gain, loss and all data (loss and gain are duplicated in all)
+All_df <- change_df %>%
+  mutate(loss_gain = 'ALL') %>%
+  filter(canopy_change != 0)
+
+# create df with positive and negative change uniquely labeled and bind to All_df
+Box_p_df <- change_df %>%
+  mutate(loss_gain = ifelse(canopy_change <0, "LOSS", ifelse(canopy_change > 0, "GAIN", "NO_CHANGE"))) %>%
+  filter(loss_gain != "NO_CHANGE") %>%
+  mutate(canopy_change_abs = abs(canopy_change)) %>%
+  bind_rows(All_df) %>%
+  mutate(loss_gain = fct_relevel(loss_gain, 'LOSS', 'GAIN'))%>%
+  mutate(signs_YNf = fct_relevel(signs_YNf, 'No Foraging'))
+
+
+# load Canopy height dataset
+
+
+zones_df <- read_csv('./data/CWC_can_heights_df.csv') %>%
+  filter(canopy_height > 0)
+
+BACI_df <- zones_df %>%
+  filter(time_step == "Dec16" | time_step == "Jan18" | time_step == "Sep17" | time_step == "Sep18") %>%
+  mutate(signs_YNf = fct_relevel(signs_YNf, 'No Foraging')) %>%
+  mutate(season = ifelse(time_step == "Dec16" | time_step =="Jan18", 'Dec16 - Jan18',
+                         ifelse(time_step == "Sep17" | time_step =="Sep18", 'Sep17 - Sep18', NA)))
+
+
+
+```
+
+## Proportion of foraged and non-foraged zones that experience change.
+
+This plot shows for each time step the percentage of foraged and non-foraged zones which experiences either positive or negative change.
+
+```{r Percentage change per zone, echo=TRUE, , fig.align = "centre"}
+ggplot(Prop_change, aes(x=loss_gain, y = Perc_Area, fill = signs_YNf)) +
+  geom_bar(width=0.8, stat="identity", position=position_dodge(width=0.9), colour='black', alpha=0.8)+
+  geom_text(aes(label=paste(round(Perc_Area, 1), "%")),position=position_dodge(width=0.95), vjust=1.5, size=3) +
+  facet_wrap(~time_step) +
+  labs(y='Area with Elevation Change (%)', x= 'Direction of Elevation Change') +
+  scale_fill_manual("Zone", values=c('#377eb8', '#ff7f00')) 
+```
+
+## Rate of change in foraged and non-foraged zones
+
+A plot to show the differences in the rates of change across foraged and non-foraged zones. Gain refers to any region experiencing positive change, Loss referes to areas where vegetation height declines between the two time periods and ALL shows the net change in elevation in each zone.
+
+
+``` {r rate of change, echo=TRUE, fig.align = "centre"}
+calc_boxplot_stat <- function(x) { 
+  coef <- 1.5
+  n <- sum(!is.na(x))
+  # calculate quantiles
+  stats <- quantile(x, probs = c(0.0, 0.25, 0.5, 0.75, 1.0))
+  names(stats) <- c("ymin", "lower", "middle", "upper", "ymax")
+  iqr <- diff(stats[c(2, 4)])
+  # set whiskers
+  outliers <- x < (stats[2] - coef * iqr) | x > (stats[4] + coef * iqr)
+  if (any(outliers)) {
+    stats[c(1, 5)] <- range(c(stats[2:4], x[!outliers]), na.rm = TRUE)
+  }
+  return(stats)
+}
+
+
+# this adds colours to the right hand facets
+colour_right_facets <- function(plot){
+  g <- ggplot_gtable(ggplot_build(plot))
+  stripr <- which(grepl('strip-r', g$layout$name))
+  fills <- c("grey90","grey70","grey50")
+  k <- 1
+  for (i in stripr) {
+    j <- which(grepl('rect', g$grobs[[i]]$grobs[[1]]$childrenOrder))
+    g$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- fills[k]
+    k <- k+1
+  }
+  grid.arrange(g)
+}
+
+# Veg change box plots
+change_plot <- function(.data){
+p <- ggplot(.data, aes(x=signs_YNf, y= canopy_change, colour=signs_YNf, fill=signs_YNf)) +
+  stat_summary(fun.data = calc_boxplot_stat, geom="boxplot", alpha = 0.8, colour='#000000') +
+  facet_grid(loss_gain~ time_step,  scales = "free") +
+  labs(y=bquote('Canopy Elevation change  '~(m/m^2)))+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  scale_fill_manual("Zone", values=c('#377eb8', '#ff7f00')) 
+
+colour_right_facets(p)
+}
+
+
+change_plot(Box_p_df)
+
+```
+
+## Regression Analysis of change rates
+
+Regression analysis to show the differnce in rates of change between the foraged and non-foraged zones.
+
+```{r rates of change regression, echo = TRUE, warning=FALSE}
+reg_tab <- function(.data){ 
+  
+  tab_col <- 'grey80'
+  
+  lg <- pull(.data, var = loss_gain)[1]
+  if (lg == 'LOSS'){
+    tit <- 'Loss Regions Regression (Gamma GLM):'
+    tab_col <- 'grey90'
+  } else if (lg == 'GAIN'){
+    tit <- 'Gain Regions Regression (Gamma GLM):'
+    tab_col <- 'grey70'
+  } else {
+    tit <- 'Net Change Regression (LM):'
+    tab_col <- 'grey50'
+  }
+  
+  .data %>%
+    group_by(time_step)%>%
+    select(!loss_gain) %>%
+    gt() %>%
+    tab_style(style = cell_fill(tab_col), locations = cells_title()) %>%
+    tab_style(style = cell_fill('grey95'), locations = cells_row_groups()) %>%
+    tab_header(title = md(sprintf('**<div style="text-align: left"> %s </div>**', tit))) 
+  
+  
+}
+
+# regression tibble for Net change
+group_regr_1 <- Box_p_df %>% 
+  filter(loss_gain=='ALL')%>%
+  group_by(loss_gain,time_step) %>%
+  do(fitForage = tidy(lm(formula = canopy_change ~ signs_YNf, data = .))) %>% 
+  unnest(fitForage) %>%
+  mutate_if(is.numeric, round, 5) 
+
+# regression for positive and negative change then join to net change and create gt table
+reg_tabs <- Box_p_df %>% 
+  filter(loss_gain!='ALL')%>%
+  group_by(loss_gain, time_step) %>%
+  do(fitForage = tidy(glm(formula = canopy_change_abs ~ signs_YNf, data = ., family=Gamma(link = 'identity')))) %>% 
+  unnest(fitForage) %>%
+  mutate_if(is.numeric, round, 3) %>%
+  bind_rows(group_regr_1) %>%
+  mutate(estimate = ifelse(loss_gain == 'LOSS', estimate *-1, estimate)) %>%
+  mutate(statistic = ifelse(loss_gain == 'LOSS', statistic *-1, estimate))%>%
+  mutate(term = ifelse(term=='signs_YNfForaging Observed', 'Foraging Observed', term)) %>%
+  mutate(p.value = ifelse(p.value < 0.001, '< 0.001 **', 
+                          ifelse(p.value < 0.05, paste(formatC(p.value,format = "f", 3), '*', sep = " "),
+                                 ifelse(p.value < 0.1, paste(formatC(p.value,format = "f", 3), '.', sep = " "),
+                                        formatC(p.value,format = "f", 3))))) %>%
+  rename(T.statistic = statistic) %>%
+  group_by(loss_gain) %>%
+  group_split() %>%
+  purrr::map(., ~reg_tab(.)) 
+
+reg_tabs[[1]]
+
+reg_tabs[[2]]
+
+reg_tabs[[3]]
+
+```
+
+## Compare canopy height distributions between zones
+
+Here we compare the canopy height distribution of foraged and non-foraged zones for the first and last timesteps in the winter and summer periods. 
+
+```{r density plots, fig.width=10, fig.height=6, fig.align = "centre", echo=TRUE}
+
+# this adds colours to the right hand facets
+colour_right_facets <- function(plot){
+  g <- ggplot_gtable(ggplot_build(plot))
+  stripr <- which(grepl('strip-r', g$layout$name))
+  fills <- c("grey90","grey70","grey50")
+  k <- 1
+  for (i in stripr) {
+    j <- which(grepl('rect', g$grobs[[i]]$grobs[[1]]$childrenOrder))
+    g$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- fills[k]
+    k <- k+1
+  }
+  grid.arrange(g)
+}
+
+compare_canopies_plot <- function(.data){
+  p <- .data %>%
+    ggplot(., aes(x= canopy_height, group=time_step, fill=time_step)) +
+    geom_density(colour = "black", alpha = 0.8)+
+    facet_grid(season~signs_YNf) +
+    labs(x = "Canopy Height  (m)", y='Density') +
+    # scale_fill_brewer(type="qual", palette = "Dark2", direction=-1)
+    scale_fill_manual(values=c('#d95f02', '#1b9e77', '#e6ab02', "#7570b3"))
+  
+  colour_right_facets(p)
+  
+}
+# "#56B4E9", "#E69F00"
+compare_canopies_plot(BACI_df)
+
+```
+
+## Regression Analysis - comparison of canopy heights
+
+
+``` {r canopy height regression, echo = TRUE, warning=FALSE}
+
+fit.model <- function(.data){
+  glm(canopy_height ~ signs_YNf * time_step, family=Gamma(link='identity'),data = .data)
+}
+
+
+diag.plots <- function(.model){
+  par(mfrow = c(2, 2))
+  # plot(.model)
+  resids <- resid(.model)
+  hist(resids)
+  plot(.model, which = 2)
+  plot(.model, which = 1)
+  plot(.model, which = 5)
+  par(mfrow = c(1, 1))
+}
+
+diag.plots2 <- function(.model){
+  autoplot(.model, which = 1:6, ncol = 3, label.size = 3) 
+}
+
+
+reg_sum_tab <- function(.model, tit, tab.col){
+  
+  tidy(.model) %>%
+    mutate_at(vars(estimate, std.error, statistic), round,3) %>%
+    mutate(p.value = ifelse(p.value < 0.001, '< 0.001 **', 
+                            ifelse(p.value < 0.05, paste(formatC(p.value,format = "f", 3), '*', sep = " "),
+                                   ifelse(p.value < 0.1, paste(formatC(p.value,format = "f", 3), '.', sep = " "),
+                                          formatC(p.value,format = "f", 3))))) %>%
+    rename(T.statistic = statistic) %>%
+    mutate(term = ifelse(term=='signs_YNfForaging Observed', 'Foraging Observed', term)) %>%
+    mutate(term = ifelse(term=='time_stepSep18', 'Sep 2018', term)) %>%
+    mutate(term = ifelse(term=='time_stepJan18 ', 'Jan 2018', term)) %>%
+    mutate(term = ifelse(term=='signs_YNfForaging Observed:time_stepSep18', 'Foraging Observed:Sep 2018', term)) %>%
+    mutate(term = ifelse(term=='signs_YNfForaging Observed:time_stepJan18', 'Foraging Observed:Jan 2018', term)) %>%
+    gt()%>%
+    tab_header(title = md(sprintf('**<div style="text-align: left"> %s </div>**', tit))) %>%
+    tab_style(style = cell_fill(tab.col), locations = cells_title())
+  
+}
+
+emmeans_tab <- function(.model, tit, tab.col){
+  tidy(emmeans(.model, ~signs_YNf * time_step)) %>%
+    mutate_at(vars(estimate, std.error, z.ratio), round,3) %>%
+    select(-c(df, p.value)) %>%
+    rename(Date = time_step) %>%
+    rename(Zone = signs_YNf) %>%
+    gt()%>%
+    tab_header(title = md(sprintf('**<div style="text-align: left"> %s </div>**', tit))) %>%
+    tab_style(style = cell_fill(tab.col), locations = cells_title()) 
+}
+
+
+reg <- BACI_df %>%
+  group_by(season) %>%
+  group_split()%>%
+  purrr::map(., ~fit.model(.))
+
+winter_reg <- reg[[1]]
+summer_reg <- reg[[2]]
+
+reg_sum_tab(reg[[1]], "Regression Summary: Dec 2016 - Jan 2018", 'grey90')
+reg_sum_tab(reg[[2]], "Regression Summary: Sep 2017 - Sep 2018", 'grey70')
+
+emmeans_tab(reg[[1]], "Marginal Means: Dec 2016 - Jan 2018", 'grey90')
+emmeans_tab(reg[[2]], "Marginal Means: Sep 2017 - Sep 2018", 'grey70')
+
+```
