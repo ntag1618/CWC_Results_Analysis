@@ -66,6 +66,7 @@ crw34_tup = (crw34_name, crw34_path, crw34_fs)
 
 # all_feeding = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files/CWC_FS_clip1.shp")
 CWC_CanChange_df = os.path.abspath("C:/HG_Projects/CWC_Drone_work/CWC_Results_Analysis/data/CWC_can_change_df.csv")
+BeaverZones_out = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Beaver_Zones20m.gpkg')
 
 def main():
     print("running Zone-Compare pipline")
@@ -118,6 +119,7 @@ def compare_zones(zones, diff_ras, feed_signs, name):
     fs_gdf.plot(color='red', ax=ax, markersize=8, alpha=0.3)
     plt.title(name + ' beaver and non beaver zones')
     plt.show()
+    zones_comb.to_file(BeaverZones_out, driver='GPKG')
 
 
     beav_zone_df = mask_ras_get_df(beav_zone, diff_ras)

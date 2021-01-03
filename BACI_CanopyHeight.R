@@ -174,3 +174,34 @@ tidy(emmeans(winter_reg, ~signs_YNf * time_step))
 
 
 hist(Summer_BACI_df$canopy_height)
+
+
+# ----------- F tests -------------
+
+sep17_FO <- BACI_df%>%
+  filter(time_step=="Sep17") %>%
+  filter(signs_YNf =="Foraging Observed") %>%
+  select(canopy_height) %>%
+  as_vector()
+
+sep17_NF <- BACI_df%>%
+  filter(time_step=="Sep17") %>%
+  filter(signs_YNf =="No Foraging") %>%
+  select(canopy_height)%>%
+  as_vector()
+
+sep18_FO <- BACI_df%>%
+  filter(time_step=="Sep18") %>%
+  filter(signs_YNf =="Foraging Observed")%>%
+  select(canopy_height)%>%
+  as_vector()
+
+sep18_NF <- BACI_df%>%
+  filter(time_step=="Sep18") %>%
+  filter(signs_YNf =="No Foraging")%>%
+  select(canopy_height)%>%
+  as_vector()
+
+var.test(sep17_FO, sep18_FO)
+var.test(sep17_NF, sep18_NF)
+

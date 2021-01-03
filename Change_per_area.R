@@ -85,7 +85,7 @@ p <- ggplot(.data, aes(x=signs_YNf, y= canopy_change, colour=signs_YNf, fill=sig
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
-  scale_fill_manual("Zone", values=c('#377eb8', '#ff7f00')) 
+  scale_fill_manual("Zone", values=c('#AC4EC8', '#60C84E')) 
 
 colour_right_facets(p)
 }
@@ -164,8 +164,9 @@ group_regr_all <- Box_p_df %>%
   group_split() %>%
   purrr::map(., ~reg_tab(.)) %>%
   join.hori(.) %>%
-  grid.arrange() %>%
-  ggsave(filename = 'NewPlots/regression_summary.jpg', dpi = 600, height = 10, width = 30, units = 'cm')
+  grid.arrange()
+
+  ggsave(filename = 'NewPlots/regression_summary.jpg', plot=group_regr_all, dpi = 600, height = 10, width = 30, units = 'cm')
 
 
 # --------------- Model Diagnostics --------------------------------

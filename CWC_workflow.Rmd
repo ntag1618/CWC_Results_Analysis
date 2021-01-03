@@ -42,7 +42,7 @@ theme_set(theme_bw() +
 
 This workflow describes the approach taken to quantify the imapct of beaver foraging on the riparian woodland at CWC. 
 
-```{r load and clean data, echo=FALSE}
+```{r load and clean data, include=FALSE}
 
 change_df <- read_csv('./data/CWC_can_change_df.csv') %>%
   filter(time_step != "Dec16 - Mar18") %>%
@@ -110,7 +110,7 @@ ggplot(Prop_change, aes(x=loss_gain, y = Perc_Area, fill = signs_YNf)) +
   geom_text(aes(label=paste(round(Perc_Area, 1), "%")),position=position_dodge(width=0.95), vjust=1.5, size=3) +
   facet_wrap(~time_step) +
   labs(y='Area with Elevation Change (%)', x= 'Direction of Elevation Change') +
-  scale_fill_manual("Zone", values=c('#377eb8', '#ff7f00')) 
+  scale_fill_manual("Zone", values=c('#AC4EC8', '#60C84E')) 
 ```
 
 ## Rate of change in foraged and non-foraged zones
@@ -158,7 +158,7 @@ p <- ggplot(.data, aes(x=signs_YNf, y= canopy_change, colour=signs_YNf, fill=sig
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
-  scale_fill_manual("Zone", values=c('#377eb8', '#ff7f00')) 
+  scale_fill_manual("Zone", values=c('#AC4EC8', '#60C84E')) 
 
 colour_right_facets(p)
 }
@@ -253,7 +253,7 @@ colour_right_facets <- function(plot){
     g$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- fills[k]
     k <- k+1
   }
-  grid.arrange(g)
+  return(g)
 }
 
 compare_canopies_plot <- function(.data){
@@ -269,7 +269,7 @@ compare_canopies_plot <- function(.data){
   
 }
 # "#56B4E9", "#E69F00"
-compare_canopies_plot(BACI_df)
+grid.arrange(compare_canopies_plot(BACI_df))
 
 ```
 
