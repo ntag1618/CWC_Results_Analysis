@@ -20,51 +20,50 @@ home = os.path.abspath("C:/HG_Projects/CWC_Drone_work/Prec_Anal_Exports/Rasters_
 shps_root = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files")
 shrub_zones = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones20m.gpkg')
 
-
-# WINTER 1-2
+#
 ts1_name = "Dec16"
 ts1_path = os.path.join(home, "chm1.tif")
 # ts1_fs = os.path.join(shps_root, 'FS_1617.shp')
 ts1_fs = os.path.join(shps_root, 'Feed_signs_All.gpkg')
 ts1_tup = (ts1_name, ts1_path, ts1_fs)
 
-# WINTER 1-3
-ts2_name = "Feb17"
-ts2_path = os.path.join(home, "chm2.tif")
-# ts2_fs = os.path.join(shps_root, 'FS_1617.shp')
-ts2_fs = os.path.join(shps_root, 'Feed_signs_All.gpkg')
-ts2_tup = (ts2_name, ts2_path, ts2_fs)
 
-# WINTER 1-4
 ts3_name = "Sep17"
 ts3_path = os.path.join(home, "chm3.tif")
 # ts3_fs = os.path.join(shps_root, 'FS_1617.shp')
 ts3_fs =os.path.join(shps_root, 'Feed_signs_All.gpkg')
 ts3_tup = (ts3_name, ts3_path, ts3_fs)
 
-# WINTER 2-3
+#
 ts4_name = "Jan18"
 ts4_path = os.path.join(home, "chm4.tif")
 # ts4_fs = os.path.join(shps_root, 'FS_1718.shp')
 ts4_fs = os.path.join(shps_root, 'Feed_signs_All.gpkg')
 ts4_tup = (ts4_name, ts4_path, ts4_fs)
-
-# WINTER 2-4
-ts5_name = "Mar18"
-ts5_path = os.path.join(home, "chm5.tif")
-# ts5_fs = os.path.join(shps_root, 'FS_1718.shp')
-ts5_fs =os.path.join(shps_root, 'Feed_signs_All.gpkg')
-ts5_tup = (ts5_name, ts5_path, ts5_fs)
-
-# WINTER 3-4
+#
 ts6_name = "Sep18"
 ts6_path = os.path.join(home, "chm6.tif")
 # ts6_fs = os.path.join(shps_root, 'FS_1718.shp')
 ts6_fs = os.path.join(shps_root, 'Feed_signs_All.gpkg')
 ts6_tup = (ts6_name, ts6_path, ts6_fs)
 
+# #
+# ts2_name = "Feb17"
+# ts2_path = os.path.join(home, "chm2.tif")
+# # ts2_fs = os.path.join(shps_root, 'FS_1617.shp')
+# ts2_fs = os.path.join(shps_root, 'Feed_signs_All.gpkg')
+# ts2_tup = (ts2_name, ts2_path, ts2_fs)
+#
+#
+# #
+# ts5_name = "Mar18"
+# ts5_path = os.path.join(home, "chm5.tif")
+# # ts5_fs = os.path.join(shps_root, 'FS_1718.shp')
+# ts5_fs =os.path.join(shps_root, 'Feed_signs_All.gpkg')
+# ts5_tup = (ts5_name, ts5_path, ts5_fs)
 
 # all_feeding = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files/CWC_FS_clip1.shp")
+
 CWC_CanChange_df = os.path.abspath("C:/HG_Projects/CWC_Drone_work/CWC_Results_Analysis/data/CWC_can_heights_df.csv")
 
 def main():
@@ -72,7 +71,7 @@ def main():
 
     df_list = []
     name_list = []
-    for ts in [ts1_tup, ts2_tup, ts3_tup, ts4_tup, ts5_tup, ts6_tup]:
+    for ts in [ts1_tup,  ts3_tup, ts4_tup,  ts6_tup]: # ts5_tup,ts2_tup,
         change_ras = ts[1]
         name = ts[0]
         fs = ts[2]

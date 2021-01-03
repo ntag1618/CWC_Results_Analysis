@@ -10,7 +10,8 @@ from matplotlib import pyplot as plt
 import pandas as pd
 
 zones_out = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Woodland_Zones20m.gpkg')
-
+grid_out = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CWC_Results_Analysis/ZoneMethodPlot_data/'
+                           'grid_20m.gpkg')
 trees_vec = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Rip_Vec_Sep17.gpkg')
 
 def main():
@@ -32,6 +33,7 @@ def main():
 
     grid = gpd.GeoDataFrame({'geometry':polygons})
     grid.crs = trees_gdf.crs
+    grid.to_file(grid_out, driver='GPKG')
 
     zones = gpd.overlay(trees_gdf, grid,  how='intersection')
 

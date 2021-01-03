@@ -26,45 +26,46 @@ crs12_path = os.path.join(home, "DoD_Sep17_Sep18.tif")
 crs12_fs = os.path.join(shps_root, 'FS_1618.shp')
 crs12_tup = (crs12_name, crs12_path, crs12_fs)
 
-
-# WINTER 1-2
-crw12_name = "Dec16 - Feb17"
-crw12_path = os.path.join(home, "DOD_Dec16_Feb17.tif")
-crw12_fs = os.path.join(shps_root, 'FS_1617.shp')
-crw12_tup = (crw12_name, crw12_path, crw12_fs)
-
 # WINTER 1-3
 crw13_name = "Dec16 - Jan18"
 crw13_path = os.path.join(home, "DOD_Dec16_Jan18.tif")
 crw13_fs = os.path.join(shps_root, 'FS_1618.shp')
 crw13_tup = (crw13_name, crw13_path, crw13_fs)
 
-# WINTER 1-4
-crw14_name = "Dec16 - Mar18"
-crw14_path = os.path.join(home, "DoD_Dec16_Mar18.tif")
-crw14_fs = os.path.join(shps_root, 'FS_1618.shp')
-crw14_tup = (crw14_name, crw14_path, crw14_fs)
+# # WINTER 1-2
+# crw12_name = "Dec16 - Feb17"
+# crw12_path = os.path.join(home, "DOD_Dec16_Feb17.tif")
+# crw12_fs = os.path.join(shps_root, 'FS_1617.shp')
+# crw12_tup = (crw12_name, crw12_path, crw12_fs)
 
-# WINTER 2-3
-crw23_name = "Feb17 - Jan18"
-crw23_path = os.path.join(home, "DOD_Feb17_Jan18.tif")
-crw23_fs = os.path.join(shps_root, 'FS_1718.shp')
-crw23_tup = (crw23_name, crw23_path, crw23_fs)
 
-# WINTER 2-4
-crw24_name = "Feb17 - Mar18"
-crw24_path = os.path.join(home, "DOD_Feb17_March18.tif")
-crw24_fs = os.path.join(shps_root, 'FS_1718.shp')
-crw24_tup = (crw24_name, crw24_path, crw24_fs)
+# # WINTER 1-4
+# crw14_name = "Dec16 - Mar18"
+# crw14_path = os.path.join(home, "DoD_Dec16_Mar18.tif")
+# crw14_fs = os.path.join(shps_root, 'FS_1618.shp')
+# crw14_tup = (crw14_name, crw14_path, crw14_fs)
 
-# WINTER 3-4
-crw34_name = "Jan18 - Mar18"
-crw34_path = os.path.join(home, "DOD_Jan18_March18.tif")
-crw34_fs = os.path.join(shps_root, 'FS_1718.shp')
-crw34_tup = (crw34_name, crw34_path, crw34_fs)
+# # WINTER 2-3
+# crw23_name = "Feb17 - Jan18"
+# crw23_path = os.path.join(home, "DOD_Feb17_Jan18.tif")
+# crw23_fs = os.path.join(shps_root, 'FS_1718.shp')
+# crw23_tup = (crw23_name, crw23_path, crw23_fs)
+#
+# # WINTER 2-4
+# crw24_name = "Feb17 - Mar18"
+# crw24_path = os.path.join(home, "DOD_Feb17_March18.tif")
+# crw24_fs = os.path.join(shps_root, 'FS_1718.shp')
+# crw24_tup = (crw24_name, crw24_path, crw24_fs)
+#
+# # WINTER 3-4
+# crw34_name = "Jan18 - Mar18"
+# crw34_path = os.path.join(home, "DOD_Jan18_March18.tif")
+# crw34_fs = os.path.join(shps_root, 'FS_1718.shp')
+# crw34_tup = (crw34_name, crw34_path, crw34_fs)
 
 
 # all_feeding = os.path.abspath("C:/HG_Projects/CWC_Drone_work/shp_files/CWC_FS_clip1.shp")
+
 CWC_CanChange_df = os.path.abspath("C:/HG_Projects/CWC_Drone_work/CWC_Results_Analysis/data/CWC_can_change_df.csv")
 BeaverZones_out = os.path.abspath('C:/HG_Projects/CWC_Drone_work/CHM/Beaver_Zones20m.gpkg')
 
@@ -73,7 +74,7 @@ def main():
 
     df_list = []
     name_list = []
-    for ts in [crs12_tup, crw12_tup, crw13_tup, crw14_tup, crw23_tup, crw24_tup, crw34_tup]:
+    for ts in [crs12_tup, crw13_tup]: # [crs12_tup, crw12_tup, crw13_tup, crw14_tup, crw23_tup, crw24_tup, crw34_tup]
         change_ras = ts[1]
         name = ts[0]
         fs = ts[2]
