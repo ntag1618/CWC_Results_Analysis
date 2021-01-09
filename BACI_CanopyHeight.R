@@ -154,14 +154,14 @@ sum_reg_tab <- reg_sum_tab(reg[[2]], "Regression Summary: Sep 2017 - Sep 2018", 
 
 
 BACI_comb_tab <- join_tabs_vert(list(wint_reg_tab, sum_reg_tab)) %>%
-  ggsave(., filename = 'NewPlots/BACI_regSumm.png', dpi = 600, height = 7, width = 6, units = 'cm')
+  ggsave(plot=., filename = 'NewPlots/BACI_regSumm.png', dpi = 600, height = 7, width = 6, units = 'cm')
 
 wint_marmean_tab <- emmeans_tab(reg[[1]], "Marginal Means: Dec 2016 - Jan 2018", 'grey90')
 sum_marmean_tab <- emmeans_tab(reg[[2]], "Marginal Means: Sep 2017 - Sep 2018", 'grey70')
 
 
 BACI_margmeans <- join_tabs_vert(list(wint_marmean_tab, sum_marmean_tab)) %>%
-  ggsave(., filename = 'NewPlots/BACI_MarMeans.png', dpi = 600, height = 7, width = 6, units = 'cm')
+  ggsave(plot=., filename = 'NewPlots/BACI_MarMeans.png', dpi = 600, height = 7, width = 6, units = 'cm')
 
 # ---------- Regression Diagnostics
 summary(winter_reg)
