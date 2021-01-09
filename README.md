@@ -22,11 +22,11 @@ This workflow details the analysis of canopy height data, derived from drone-bas
 
 6. Right, so it looks like the difference in canopy height vetween the two time peridos is neglibile in both winter and summer survey periods. However,there is an interesting observation - In summer there is an increase in the elevation of mid sized trees - unsurprising really, trees grow. However, this isn't reflected in the Winter monitoring perio - my guess is that this is due to the worse reconstruction of canopy heights during the winter.... Let's do some stats and find out what's happening.If we see a significant interaction between time period and foraging we can deduce that beavers have had a significant effect on canopy structure....
 
-![Canopy height BACI regression](/NewPlots/BACI_regSumm.jpg)
+![Canopy height BACI regression](/NewPlots/BACI_regSumm.png)
 
 7. Yes, it seems that beaver foraging does significantly effect canopy structure (but only very slightly) relative to unforaged areas. However, this change is only detectable in Winter - perhaps an artefact of the survey method? Let's chaeck out the marginal means to better contextualise the resutls of the regression...
 
-![Marginal Means of Canopy Height regression](/NewPlots/BACI_MarMeans.jpg)
+![Marginal Means of Canopy Height regression](/NewPlots/BACI_MarMeans.png)
 
 Right so we can see that there is loss ion both regions during winter - this is why we need to consider the interaction effect! But in the summer there is an increase in the mean height of the canopy in non-foraged areas but a decline in mean height in foraged regions. This perhaps indicates that, in temperate landscapes, beaver may actually help to maintain lower height "shrubby" riparian woodland structure. Additionally, if we refer back the boplot figure, we can see that the variance in the rates of change, particularly where loss is concerned, is much greater where beavers are foraging. This suggests that beaver foraging is likely to increase the variability in cnopy height relative to non-foraged riaprian woodland.
 
