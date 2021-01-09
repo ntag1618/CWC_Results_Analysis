@@ -166,7 +166,7 @@ group_regr_all <- Box_p_df %>%
   join.hori(.) %>%
   grid.arrange()
 
-  ggsave(filename = 'NewPlots/regression_summary.jpg', plot=group_regr_all, dpi = 600, height = 10, width = 30, units = 'cm')
+  ggsave(filename = 'NewPlots/Direc_reg_summary.png', plot=group_regr_all, dpi = 600, height = 10, width = 30, units = 'cm')
 
 
 # --------------- Model Diagnostics --------------------------------

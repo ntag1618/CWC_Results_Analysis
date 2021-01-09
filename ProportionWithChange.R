@@ -127,6 +127,6 @@ LR_zones_df %>%
   group_by(time_step, loss_gain) %>%
   gt() %>%
   tab_style(style = cell_fill('grey95'), locations = cells_row_groups()) %>%
-  gtsave(., filename = normalizePath('NewPlots/log_reg_tabs.html', mustWork=FALSE))
+  gtsave(., filename = normalizePath('NewPlots/log_reg_tabs.png', mustWork=FALSE))
   
-summary(lr1)
+
